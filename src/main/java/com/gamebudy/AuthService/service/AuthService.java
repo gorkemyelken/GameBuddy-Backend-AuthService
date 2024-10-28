@@ -5,7 +5,6 @@ import com.gamebudy.AuthService.dto.LoginResponse;
 import com.gamebudy.AuthService.dto.RegisterRequest;
 import com.gamebudy.AuthService.dto.RegisterResponse;
 import com.gamebudy.AuthService.exception.BadCredentialsException;
-import com.gamebudy.AuthService.util.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
@@ -22,15 +21,13 @@ public class AuthService {
 
     private final RestTemplate restTemplate;
     private final PasswordEncoder passwordEncoder;
-    private final JwtUtil jwtUtil;
     private final String userServiceUrl;
 
     @Autowired
-    public AuthService(RestTemplate restTemplate, PasswordEncoder passwordEncoder, JwtUtil jwtUtil,
+    public AuthService(RestTemplate restTemplate, PasswordEncoder passwordEncoder,
                        @Value("${user.service.url}") String userServiceUrl) {
         this.restTemplate = restTemplate;
         this.passwordEncoder = passwordEncoder;
-        this.jwtUtil = jwtUtil;
         this.userServiceUrl = userServiceUrl;
     }
 
