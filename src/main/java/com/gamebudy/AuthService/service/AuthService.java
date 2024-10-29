@@ -47,13 +47,13 @@ public class AuthService {
     }
 
     public LoginResponse login(LoginRequest loginRequest) {
-        // Kullanıcıyı bulmak için User Service'e istek yap
+        // Kullanıcıyı bulmak için User Service'e GET isteği yap
         String findUserUrl = userServiceUrl + "/users/find?userName=" + loginRequest.getUserName();
 
         ResponseEntity<LoginResponse> response = restTemplate.exchange(
                 findUserUrl,
-                HttpMethod.POST,
-                null,
+                HttpMethod.GET, // Burayı POST yerine GET olarak değiştiriyoruz
+                null, // GET isteği için gövde gerekmez
                 new ParameterizedTypeReference<LoginResponse>() {}
         );
 
@@ -64,12 +64,12 @@ public class AuthService {
 
         LoginResponse foundUser = response.getBody();
 
-        // Şifre kontrolü yapmak için UserService'e istek at
+        // Şifre kontrolü yapmak için UserService'e POST isteği at
         String matchPasswordUrl = userServiceUrl + "/users/match-password?username=" + loginRequest.getUserName() + "&password=" + loginRequest.getPassword();
 
         ResponseEntity<Boolean> passwordResponse = restTemplate.exchange(
                 matchPasswordUrl,
-                HttpMethod.POST,
+                HttpMethod.POST, // Bu POST isteği olarak kalabilir
                 null,
                 new ParameterizedTypeReference<Boolean>() {}
         );
