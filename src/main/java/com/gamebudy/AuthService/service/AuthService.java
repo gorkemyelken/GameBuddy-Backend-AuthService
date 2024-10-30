@@ -1,6 +1,9 @@
 package com.gamebudy.AuthService.service;
 
-import com.gamebudy.AuthService.dto.*;
+import com.gamebudy.AuthService.dto.LoginRequest;
+import com.gamebudy.AuthService.dto.LoginResponse;
+import com.gamebudy.AuthService.dto.RegisterRequest;
+import com.gamebudy.AuthService.dto.RegisterResponse;
 import com.gamebudy.AuthService.exception.results.DataResult;
 import com.gamebudy.AuthService.exception.results.ErrorDataResult;
 import com.gamebudy.AuthService.exception.results.Result;
@@ -43,7 +46,8 @@ public class AuthService {
                 userServiceUrl + "/users/register",
                 HttpMethod.POST,
                 request,
-                new ParameterizedTypeReference<DataResult<RegisterResponse>>() {}
+                new ParameterizedTypeReference<DataResult<RegisterResponse>>() {
+                }
         );
 
         return response.getBody();
@@ -57,18 +61,25 @@ public class AuthService {
                 findUserUrl,
                 HttpMethod.GET,
                 null,
-                new ParameterizedTypeReference<DataResult<LoginResponse>>() {}
+                new ParameterizedTypeReference<DataResult<LoginResponse>>() {
+                }
         );
+
+        if (response.getBody() == null || !response.getBody().isSuccess()) {
+            return new ErrorDataResult<>("User not found.");
+        }
 
         LoginResponse foundUser = response.getBody().getData();
 
-        String matchPasswordUrl = userServiceUrl + "/users/match-password?username=" + loginRequest.getUserName() + "&password=" + loginRequest.getPassword();
+        String matchPasswordUrl = userServiceUrl + "/users/match-password?userName=" + loginRequest.getUserName() + "&password=" + loginRequest.getPassword();
+
 
         ResponseEntity<Result> passwordResponse = restTemplate.exchange(
                 matchPasswordUrl,
                 HttpMethod.POST,
                 null,
-                new ParameterizedTypeReference<Result>() {}
+                new ParameterizedTypeReference<Result>() {
+                }
         );
 
         if (!Boolean.TRUE.equals(passwordResponse.getBody().isSuccess())) {
@@ -76,6 +87,7 @@ public class AuthService {
         }
 
         return new SuccessDataResult<>(foundUser, "User login successfully.");
+
     }
 
 
