@@ -30,6 +30,10 @@ public class AuthService {
     }
 
     public DataResult<RegisterResponse> register(RegisterRequest registerRequest) {
+        if (!isPasswordValid(registerRequest.getPassword())) {
+            return new ErrorDataResult<>("Password must be between 8 and 16 characters.");
+        }
+
         registerRequest.setPassword(passwordEncoder.encode(registerRequest.getPassword()));
 
         HttpEntity<RegisterRequest> request = new HttpEntity<>(registerRequest);
@@ -71,6 +75,11 @@ public class AuthService {
         }
 
         return new SuccessDataResult<>(foundUser, "User retrieved successfully.");
+    }
+
+
+    private boolean isPasswordValid(String password) {
+        return password.length() >= 8 && password.length() <= 16;
     }
 
 }
