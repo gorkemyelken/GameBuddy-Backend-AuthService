@@ -3,6 +3,7 @@ package com.gamebudy.AuthService.dto;
 import lombok.Data;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Data
 public class LoginResponse {
@@ -12,7 +13,9 @@ public class LoginResponse {
     private Gender gender;
     private Integer age;
     private String profilePhoto;
-    private boolean isPremium;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+    private List<String> preferredLanguages;
+    private boolean premium;
 }
+

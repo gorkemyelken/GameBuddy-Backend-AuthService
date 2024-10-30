@@ -3,6 +3,7 @@ package com.gamebudy.AuthService.service;
 import com.gamebudy.AuthService.dto.*;
 import com.gamebudy.AuthService.exception.results.DataResult;
 import com.gamebudy.AuthService.exception.results.ErrorDataResult;
+import com.gamebudy.AuthService.exception.results.Result;
 import com.gamebudy.AuthService.exception.results.SuccessDataResult;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -50,7 +51,7 @@ public class AuthService {
 
 
     public DataResult<LoginResponse> login(LoginRequest loginRequest) {
-        String findUserUrl = userServiceUrl + "/users/find?userName=" + loginRequest.getUserName();
+        String findUserUrl = userServiceUrl + "/users/findUser?userName=" + loginRequest.getUserName();
 
         ResponseEntity<DataResult<LoginResponse>> response = restTemplate.exchange(
                 findUserUrl,
@@ -63,18 +64,18 @@ public class AuthService {
 
         String matchPasswordUrl = userServiceUrl + "/users/match-password?username=" + loginRequest.getUserName() + "&password=" + loginRequest.getPassword();
 
-        ResponseEntity<PasswordResponse> passwordResponse = restTemplate.exchange(
+        ResponseEntity<Result> passwordResponse = restTemplate.exchange(
                 matchPasswordUrl,
                 HttpMethod.POST,
                 null,
-                new ParameterizedTypeReference<PasswordResponse>() {}
+                new ParameterizedTypeReference<Result>() {}
         );
 
         if (!Boolean.TRUE.equals(passwordResponse.getBody().isSuccess())) {
             return new ErrorDataResult<>("Invalid username or password.");
         }
 
-        return new SuccessDataResult<>(foundUser, "User retrieved successfully.");
+        return new SuccessDataResult<>(foundUser, "User login successfully.");
     }
 
 
