@@ -44,6 +44,7 @@ public class AuthService {
         return response.getBody();
     }
 
+
     public DataResult<LoginResponse> login(LoginRequest loginRequest) {
         String findUserUrl = userServiceUrl + "/users/find?userName=" + loginRequest.getUserName();
 
