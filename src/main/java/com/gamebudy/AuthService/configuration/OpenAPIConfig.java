@@ -16,7 +16,7 @@ public class OpenAPIConfig {
             @Value("${application-version}") String version) {
         return new OpenAPI()
                 .info(new Info()
-                        .title("GameBuddy User-Service")
+                        .title("GameBuddy Auth-Service")
                         .version(version)
                         .description(description)
                         .license(new License().name("GameBuddy User API Licence")));
