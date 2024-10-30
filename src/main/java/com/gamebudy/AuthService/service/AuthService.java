@@ -1,16 +1,14 @@
 package com.gamebudy.AuthService.service;
 
-import com.gamebudy.AuthService.dto.LoginRequest;
-import com.gamebudy.AuthService.dto.LoginResponse;
-import com.gamebudy.AuthService.dto.RegisterRequest;
-import com.gamebudy.AuthService.dto.RegisterResponse;
-import com.gamebudy.AuthService.exception.BadCredentialsException;
+import com.gamebudy.AuthService.dto.*;
+import com.gamebudy.AuthService.exception.results.DataResult;
+import com.gamebudy.AuthService.exception.results.ErrorDataResult;
+import com.gamebudy.AuthService.exception.results.SuccessDataResult;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -31,56 +29,47 @@ public class AuthService {
         this.userServiceUrl = userServiceUrl;
     }
 
-    public RegisterResponse register(RegisterRequest registerRequest) {
+    public DataResult<RegisterResponse> register(RegisterRequest registerRequest) {
         registerRequest.setPassword(passwordEncoder.encode(registerRequest.getPassword()));
 
         HttpEntity<RegisterRequest> request = new HttpEntity<>(registerRequest);
 
-        ResponseEntity<RegisterResponse> response = restTemplate.exchange(
+        ResponseEntity<DataResult<RegisterResponse>> response = restTemplate.exchange(
                 userServiceUrl + "/users/register",
                 HttpMethod.POST,
                 request,
-                new ParameterizedTypeReference<RegisterResponse>() {}
+                new ParameterizedTypeReference<DataResult<RegisterResponse>>() {}
         );
 
         return response.getBody();
     }
 
-    public LoginResponse login(LoginRequest loginRequest) {
-        // Kullanıcıyı bulmak için User Service'e GET isteği yap
+    public DataResult<LoginResponse> login(LoginRequest loginRequest) {
         String findUserUrl = userServiceUrl + "/users/find?userName=" + loginRequest.getUserName();
 
-        ResponseEntity<LoginResponse> response = restTemplate.exchange(
+        ResponseEntity<DataResult<LoginResponse>> response = restTemplate.exchange(
                 findUserUrl,
-                HttpMethod.GET, // Burayı POST yerine GET olarak değiştiriyoruz
-                null, // GET isteği için gövde gerekmez
-                new ParameterizedTypeReference<LoginResponse>() {}
+                HttpMethod.GET,
+                null,
+                new ParameterizedTypeReference<DataResult<LoginResponse>>() {}
         );
 
-        // Kullanıcı bulunamazsa veya yanıt alınamazsa hata fırlat
-        if (response.getStatusCode() != HttpStatus.OK || response.getBody() == null) {
-            throw new BadCredentialsException("Invalid username or password");
-        }
+        LoginResponse foundUser = response.getBody().getData();
 
-        LoginResponse foundUser = response.getBody();
-
-        // Şifre kontrolü yapmak için UserService'e POST isteği at
         String matchPasswordUrl = userServiceUrl + "/users/match-password?username=" + loginRequest.getUserName() + "&password=" + loginRequest.getPassword();
 
-        ResponseEntity<Boolean> passwordResponse = restTemplate.exchange(
+        ResponseEntity<PasswordResponse> passwordResponse = restTemplate.exchange(
                 matchPasswordUrl,
-                HttpMethod.POST, // Bu POST isteği olarak kalabilir
+                HttpMethod.POST,
                 null,
-                new ParameterizedTypeReference<Boolean>() {}
+                new ParameterizedTypeReference<PasswordResponse>() {}
         );
 
-        // Şifre eşleşmiyorsa hata fırlat
-        if (!Boolean.TRUE.equals(passwordResponse.getBody())) {
-            throw new BadCredentialsException("Invalid username or password");
+        if (!Boolean.TRUE.equals(passwordResponse.getBody().isSuccess())) {
+            return new ErrorDataResult<>("Invalid username or password.");
         }
 
-        // Başarılı bir giriş durumunda dönecek yanıtı oluşturun
-        return foundUser; // İstediğiniz bilgileri burada döndürün.
+        return new SuccessDataResult<>(foundUser, "User retrieved successfully.");
     }
 
 }

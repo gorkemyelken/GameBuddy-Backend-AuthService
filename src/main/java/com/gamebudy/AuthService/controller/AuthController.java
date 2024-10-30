@@ -4,8 +4,11 @@ import com.gamebudy.AuthService.dto.LoginRequest;
 import com.gamebudy.AuthService.dto.LoginResponse;
 import com.gamebudy.AuthService.dto.RegisterRequest;
 import com.gamebudy.AuthService.dto.RegisterResponse;
+import com.gamebudy.AuthService.exception.results.DataResult;
 import com.gamebudy.AuthService.service.AuthService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -17,13 +20,12 @@ public class AuthController {
     private AuthService authService;
 
     @PostMapping("/register")
-    public RegisterResponse register(@RequestBody RegisterRequest registerRequest) {
-        return authService.register(registerRequest);
+    public ResponseEntity<DataResult<RegisterResponse>> register(@RequestBody RegisterRequest registerRequest) {
+        return new ResponseEntity<>(authService.register(registerRequest), HttpStatus.CREATED);
     }
 
     @PostMapping("/login")
-    public LoginResponse login(@RequestBody LoginRequest loginRequest) {
-        return authService.login(loginRequest);
+    public ResponseEntity<DataResult<LoginResponse>> login(@RequestBody LoginRequest loginRequest) {
+        return new ResponseEntity<>(authService.login(loginRequest), HttpStatus.OK);
     }
-
 }
